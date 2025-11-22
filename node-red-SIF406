@@ -1,1 +1,224 @@
-
+[
+    {
+        "id": "6707720b260a7de7",
+        "type": "tab",
+        "label": "SIF 406",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "107a4a4707c170e7",
+        "type": "inject",
+        "z": "6707720b260a7de7",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "3ac6f12b5fe10d6b"
+            ]
+        ]
+    },
+    {
+        "id": "3ac6f12b5fe10d6b",
+        "type": "http request",
+        "z": "6707720b260a7de7",
+        "name": "",
+        "method": "GET",
+        "ret": "obj",
+        "paytoqs": "ignore",
+        "url": "http://130.130.130.199/api/warehouseStatus?stationTypeId=406",
+        "tls": "",
+        "persist": false,
+        "proxy": "",
+        "insecureHTTPParser": false,
+        "authType": "",
+        "senderr": false,
+        "headers": [],
+        "x": 530,
+        "y": 200,
+        "wires": [
+            [
+                "5874228ec126bc70"
+            ]
+        ]
+    },
+    {
+        "id": "5874228ec126bc70",
+        "type": "function",
+        "z": "6707720b260a7de7",
+        "name": "function 1",
+        "func": "\nlet dataArray = msg.payload.Object.Locations; \n\n\n\nlet influxPoints = dataArray.map(item => {\n    if (!item) return null;\n\n    let skuObject = item[\"SKU\"];\n    let skuValue = (skuObject && typeof\n        skuObject === 'object')\n        ? String(skuObject.SKUID || \"Unknown SKU Missing ID\")\n        : String(skuObject || \"Unknown SKU Missing ID\");\n    if (!Array.isArray(dataArray) || dataArray.length === 0) {\n        node.warn(\"Error。\");\n        return null;\n    }\n        \n   \n    let statusTextValue = (item[\"LocationStatus\"] && typeof item[\"LocationStatus\"] === 'object') \n                          ? String(item[\"LocationStatus\"].Description) \n                          : String(item[\"LocationStatus\"] || \"Unknown_Status\");\n\n    return [\n        // (Field\n        {\n            \"status_id\": Number(item[\"LocationStatusID\"]), \n            \"row\": Number(item[\"Row\"]),\n            \"column\": Number(item[\"Column\"]),\n            \"disabled\": (item[\"Disabled\"] === \"true\" || item[\"Disabled\"] === true) ? true : false,\n            \"position_number\": Number(item[\"PositionNumber\"]),\n            \"position_label\": String(item[\"PositionLabel\"] || \"N/A\") \n        },\n        // Tags\n        {\n            \"location_id\": String(item[\"LocationID\"]), \n            \"station_id\": String(item[\"StationID\"]),\n            \n            \"sku\": skuValue, \n            \"location_status_text\": statusTextValue \n        }\n    ];\n}).filter(point => point !== null); \n\nmsg.payload = influxPoints;\nmsg.measurement = \"warehouse_location\"; \n\nif (msg.payload.length === 0) {\n    return null;\n}\n\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 160,
+        "wires": [
+            [
+                "5050cb0435449d0f",
+                "48b79da7b5b175c9",
+                "2e6130af9480f6a4"
+            ]
+        ]
+    },
+    {
+        "id": "5050cb0435449d0f",
+        "type": "change",
+        "z": "6707720b260a7de7",
+        "name": "change",
+        "rules": [
+            {
+                "t": "set",
+                "p": "sif406_status",
+                "pt": "flow",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 1040,
+        "y": 240,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2e6130af9480f6a4",
+        "type": "debug",
+        "z": "6707720b260a7de7",
+        "name": "debug 1",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 980,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "48b79da7b5b175c9",
+        "type": "influxdb out",
+        "z": "6707720b260a7de7",
+        "influxdb": "40c06a7ce536d349",
+        "name": "influx output",
+        "measurement": "warehouse_location",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "s",
+        "retentionPolicyV18Flux": "",
+        "org": "MIA group 1",
+        "bucket": "SIF406",
+        "x": 1030,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "9c25b241d1615b98",
+        "type": "http in",
+        "z": "6707720b260a7de7",
+        "name": "HTTP In Node",
+        "url": "/sif406/status",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 410,
+        "y": 560,
+        "wires": [
+            [
+                "f5f0d71dd229f3ae"
+            ]
+        ]
+    },
+    {
+        "id": "f5f0d71dd229f3ae",
+        "type": "change",
+        "z": "6707720b260a7de7",
+        "name": "Change Node",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "sif406_status",
+                "tot": "flow"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 840,
+        "y": 620,
+        "wires": [
+            [
+                "c1a20ea5095d2df4"
+            ]
+        ]
+    },
+    {
+        "id": "c1a20ea5095d2df4",
+        "type": "http response",
+        "z": "6707720b260a7de7",
+        "name": "HTTP Response Node",
+        "statusCode": "200",
+        "headers": {},
+        "x": 980,
+        "y": 760,
+        "wires": []
+    },
+    {
+        "id": "40c06a7ce536d349",
+        "type": "influxdb",
+        "hostname": "127.0.0.1",
+        "port": 8086,
+        "protocol": "http",
+        "database": "database",
+        "name": "SIF407",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "2.0",
+        "url": "http://localhost:8086",
+        "timeout": 10,
+        "rejectUnauthorized": true
+    },
+    {
+        "id": "fa9fe6c45c4b7bda",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-influxdb": "0.7.0"
+        }
+    }
+]
