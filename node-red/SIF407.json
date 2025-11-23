@@ -3,7 +3,7 @@
         "id": "f8b194345e2ba8da",
         "type": "tab",
         "label": "SIF 407 by poc",
-        "disabled": false,
+        "disabled": true,
         "info": "",
         "env": []
     },
@@ -25,7 +25,7 @@
         "crontab": "",
         "once": false,
         "onceDelay": 0.1,
-        "topic": "ns=7;s=::AsGlobalPV:MESPAEA_rVoltage",
+        "topic": "ns=3;s=\"MESCommunication\".\"MESPAEA_rVoltage\"",
         "payload": "",
         "payloadType": "date",
         "x": 160,
@@ -40,7 +40,7 @@
         "id": "3b6788a42ffda61a",
         "type": "OpcUa-Client",
         "z": "f8b194345e2ba8da",
-        "endpoint": "12a3b927e2063cae",
+        "endpoint": "2b2353c896db8642",
         "action": "subscribe",
         "deadbandtype": "a",
         "deadbandvalue": 1,
@@ -64,10 +64,11 @@
         "x": 520,
         "y": 320,
         "wires": [
-            [],
             [
-                "e15981a80911bb04",
                 "0302dc3834b78645"
+            ],
+            [
+                "e15981a80911bb04"
             ],
             []
         ]
@@ -99,8 +100,8 @@
         "tosidebar": true,
         "console": false,
         "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
+        "complete": "payload",
+        "targetType": "msg",
         "statusVal": "",
         "statusType": "auto",
         "x": 1060,
@@ -128,8 +129,8 @@
         "topic": "ns=3;s=\"MESCommunication\".\"MESPAEA_rCurrent\"",
         "payload": "object",
         "payloadType": "date",
-        "x": 160,
-        "y": 280,
+        "x": 120,
+        "y": 260,
         "wires": [
             [
                 "3b6788a42ffda61a"
@@ -224,6 +225,33 @@
         ]
     },
     {
+        "id": "34e31a15a56213b2",
+        "type": "inject",
+        "z": "f8b194345e2ba8da",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ns=0;i=2258",
+        "payload": "object",
+        "payloadType": "date",
+        "x": 340,
+        "y": 100,
+        "wires": [
+            []
+        ]
+    },
+    {
         "id": "2c82e7bfd9c68469",
         "type": "http in",
         "z": "f8b194345e2ba8da",
@@ -273,9 +301,9 @@
         ]
     },
     {
-        "id": "12a3b927e2063cae",
+        "id": "2b2353c896db8642",
         "type": "OpcUa-Endpoint",
-        "endpoint": "opc.tcp://130.130.130.5:4840",
+        "endpoint": "opc.tcp://130.130.130.6:4840",
         "secpol": "None",
         "secmode": "None",
         "none": true,
@@ -285,7 +313,7 @@
         "userprivatekey": ""
     },
     {
-        "id": "bf10c6262efe9ec9",
+        "id": "e33058cfeda12880",
         "type": "global-config",
         "env": [],
         "modules": {
