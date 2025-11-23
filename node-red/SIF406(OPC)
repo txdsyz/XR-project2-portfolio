@@ -1,0 +1,238 @@
+[
+    {
+        "id": "9adb6f631aa278c4",
+        "type": "tab",
+        "label": "406-state",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3d94c1f90d8996e8",
+        "type": "inject",
+        "z": "9adb6f631aa278c4",
+        "name": "alarm",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ns=7;s=::AsGlobalPV:MESPAOEE_bAlarm",
+        "payload": "",
+        "payloadType": "date",
+        "x": 130,
+        "y": 200,
+        "wires": [
+            [
+                "33224f2b1812d97b"
+            ]
+        ]
+    },
+    {
+        "id": "33224f2b1812d97b",
+        "type": "OpcUa-Client",
+        "z": "9adb6f631aa278c4",
+        "endpoint": "2b2353c896db8642",
+        "action": "subscribe",
+        "deadbandtype": "a",
+        "deadbandvalue": 1,
+        "time": "1",
+        "timeUnit": "s",
+        "certificate": "n",
+        "localfile": "",
+        "localkeyfile": "",
+        "securitymode": "None",
+        "securitypolicy": "None",
+        "useTransport": false,
+        "maxChunkCount": 1,
+        "maxMessageSize": 8192,
+        "receiveBufferSize": 8192,
+        "sendBufferSize": 8192,
+        "setstatusandtime": false,
+        "keepsessionalive": false,
+        "name": "",
+        "applicationName": "",
+        "applicationUri": "",
+        "x": 500,
+        "y": 320,
+        "wires": [
+            [
+                "bdd0351e0ba94daa"
+            ],
+            [
+                "af7c489c5748e155"
+            ],
+            []
+        ]
+    },
+    {
+        "id": "af7c489c5748e155",
+        "type": "function",
+        "z": "9adb6f631aa278c4",
+        "name": "function 4",
+        "func": "let value = msg.payload;\n\n\nif (typeof msg.payload === \"object\" && msg.payload !== null && msg.payload.value !== undefined) {\n    value = msg.payload.value;\n}\n\n\nlet topic = msg.topic || \"\";\nlet tag = null;\n\n\nif (topic.includes(\"MESPAOEE_bAlarm\")) {\n    tag = \"alarm\";\n} else if (topic.includes(\"MESPAOEE_bBusy\")) {\n    tag = \"busy\";\n} else if (topic.includes(\"MESPAOEE_bIdle\")) {\n    tag = \"idle\";\n}\n\n\nif (!tag) return null;\n\nlet state = flow.get(\"opcValues\") || {};\nstate[tag] = value; \nflow.set(\"opcValues\", state);\n\nmsg.payload = state;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 840,
+        "y": 380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bdd0351e0ba94daa",
+        "type": "debug",
+        "z": "9adb6f631aa278c4",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 1040,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "cff8940968a61406",
+        "type": "inject",
+        "z": "9adb6f631aa278c4",
+        "name": "busy",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ns=7;s=::AsGlobalPV:MESPAOEE_bBusy",
+        "payload": "object",
+        "payloadType": "date",
+        "x": 90,
+        "y": 260,
+        "wires": [
+            [
+                "33224f2b1812d97b"
+            ]
+        ]
+    },
+    {
+        "id": "86192b444dc60f6e",
+        "type": "inject",
+        "z": "9adb6f631aa278c4",
+        "name": "idle",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "5",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "ns=7;s=::AsGlobalPV:MESPAOEE_bIdle",
+        "payload": "object",
+        "payloadType": "date",
+        "x": 130,
+        "y": 380,
+        "wires": [
+            [
+                "33224f2b1812d97b"
+            ]
+        ]
+    },
+    {
+        "id": "b7a258bc924a9ea4",
+        "type": "http in",
+        "z": "9adb6f631aa278c4",
+        "name": "HTTP In Node",
+        "url": "/sif407/status",
+        "method": "get",
+        "upload": false,
+        "skipBodyParsing": false,
+        "swaggerDoc": "",
+        "x": 450,
+        "y": 660,
+        "wires": [
+            [
+                "c22947f5605f2726"
+            ]
+        ]
+    },
+    {
+        "id": "d8dac49869358c4e",
+        "type": "http response",
+        "z": "9adb6f631aa278c4",
+        "name": "HTTP Response Node",
+        "statusCode": "200",
+        "headers": {},
+        "x": 1000,
+        "y": 700,
+        "wires": []
+    },
+    {
+        "id": "c22947f5605f2726",
+        "type": "function",
+        "z": "9adb6f631aa278c4",
+        "name": "function 5",
+        "func": "let state = flow.get(\"opcValues\")||{};\nmsg.payload = state;\nmsg.headers = {\"Content-Type\":\"application/json\"};\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 720,
+        "y": 680,
+        "wires": [
+            [
+                "d8dac49869358c4e"
+            ]
+        ]
+    },
+    {
+        "id": "2b2353c896db8642",
+        "type": "OpcUa-Endpoint",
+        "endpoint": "opc.tcp://130.130.130.6:4840",
+        "secpol": "None",
+        "secmode": "None",
+        "none": true,
+        "login": false,
+        "usercert": false,
+        "usercertificate": "",
+        "userprivatekey": ""
+    },
+    {
+        "id": "676127853ecdb956",
+        "type": "global-config",
+        "env": [],
+        "modules": {
+            "node-red-contrib-opcua": "0.2.345"
+        }
+    }
+]
